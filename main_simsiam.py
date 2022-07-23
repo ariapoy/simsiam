@@ -240,7 +240,7 @@ def main_worker(gpu, ngpus_per_node, args):
         data_mean, data_std = round(0.1307000070810318, 4), round(0.30809998512268066, 4)
     elif args.data == 'CIFAR10':
         data_mean, data_std = [0.4914, 0.4822, 0.4465], [0.247,  0.2435, 0.2616]
-    elif args.dataset == 'SVHN':
+    elif args.data == 'SVHN':
         data_mean, data_std = [0.4377, 0.4438, 0.4728], [0.198, 0.201, 0.197]
     else:
         data_mean, data_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
