@@ -148,9 +148,21 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
         torch.distributed.barrier()
     # create model
-    print("=> creating model '{}'".format(args.arch))
+    base_model = models.__dict__[args.arch](num_classes=args.dim, zero_init_residual=True)
+    if args.data in ('MNIST', 'FashionMNIST'):
+        base_model.conv1 = torch.nn.Conv2d(
+                in_channels=1,
+                out_channels=64,
+                kernel_size=(7, 7),
+                stride=(2, 2),
+                padding=(3, 3),
+                bias=False)
+    else:
+        pass
+    x = torch.randn(5, 1, 32, 32)
+    print("=> creating model '{}'".format(base_model))
     model = simsiam.builder.SimSiam(
-        models.__dict__[args.arch],
+        base_model,
         args.dim, args.pred_dim)
 
     # infer learning rate before changing batch size
