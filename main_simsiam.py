@@ -236,8 +236,12 @@ def main_worker(gpu, ngpus_per_node, args):
     traindir = os.path.join(args.data, 'train')
     if args.data == 'FashionMNIST':
         data_mean, data_std = 0.2860, 0.3530
+    elif args.data == 'MNIST':
+        data_mean, data_std = round(0.1307000070810318, 4), round(0.30809998512268066, 4)
     elif args.data == 'CIFAR10':
         data_mean, data_std = [0.4914, 0.4822, 0.4465], [0.247,  0.2435, 0.2616]
+    elif args.dataset == 'SVHN':
+        data_mean, data_std = [0.4377, 0.4438, 0.4728], [0.198, 0.201, 0.197]
     else:
         data_mean, data_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
     normalize = transforms.Normalize(mean=data_mean, std=data_std)
@@ -261,9 +265,21 @@ def main_worker(gpu, ngpus_per_node, args):
                 train=True,
                 download=True,
                 transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    elif args.data == 'MNIST':
+        train_dataset = datasets.MNIST(
+                root='../data',
+                train=True,
+                download=True,
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     elif args.data == 'CIFAR10':
         train_dataset = datasets.CIFAR10(
                 '../data',
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    elif args.data == 'SVHN':
+        train_dataset = datasets.SVHN(
+                root='../data/svhn',
+                split='train',
+                download=True,
                 transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     else:
         train_dataset = datasets.ImageFolder(
