@@ -222,8 +222,13 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    if args.data == 'FashionMNIST':
+        data_mean, data_std = 0.2860, 0.3530
+    elif args.data == 'CIFAR10':
+        data_mean, data_std = [0.4914, 0.4822, 0.4465], [0.247,  0.2435, 0.2616]
+    else:
+        data_mean, data_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+    normalize = transforms.Normalize(mean=data_mean, std=data_std)
 
     # MoCo v2's aug: similar to SimCLR https://arxiv.org/abs/2002.05709
     augmentation = [
@@ -238,9 +243,20 @@ def main_worker(gpu, ngpus_per_node, args):
         normalize
     ]
 
-    train_dataset = datasets.ImageFolder(
-        traindir,
-        simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    if args.data == 'FashionMNIST':
+        train_dataset = datasets.FashionMNIST(
+                root='../data',
+                train=True,
+                download=True,
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    elif args.data == 'CIFAR10':
+        train_dataset = datasets.CIFAR10(
+                '../data',
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    else:
+        train_dataset = datasets.ImageFolder(
+            traindir,
+            simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
