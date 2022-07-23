@@ -240,6 +240,8 @@ def main_worker(gpu, ngpus_per_node, args):
         data_mean, data_std = round(0.1307000070810318, 4), round(0.30809998512268066, 4)
     elif args.data == 'CIFAR10':
         data_mean, data_std = [0.4914, 0.4822, 0.4465], [0.247,  0.2435, 0.2616]
+    elif args.data == 'TinyImageNet':
+        data_mean, data_std = [0.486,  0.4536, 0.4024], [0.2318, 0.2285, 0.2277]
     elif args.data == 'SVHN':
         data_mean, data_std = [0.4377, 0.4438, 0.4728], [0.198, 0.201, 0.197]
     else:
@@ -247,8 +249,13 @@ def main_worker(gpu, ngpus_per_node, args):
     normalize = transforms.Normalize(mean=data_mean, std=data_std)
 
     # MoCo v2's aug: similar to SimCLR https://arxiv.org/abs/2002.05709
+    if args.data in ('TinyImageNet', 'Caltech101', 'Caltech256'):
+        # http://cs231n.stanford.edu/reports/2017/pdfs/937.pdf
+        input_size = 56
+    else:
+        input_size = 28
     augmentation = [
-        transforms.RandomResizedCrop(28, scale=(0.2, 1.)),
+        transforms.RandomResizedCrop(input_size, scale=(0.2, 1.)),
         transforms.RandomApply([
             transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
         ], p=0.8),
@@ -274,6 +281,10 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.data == 'CIFAR10':
         train_dataset = datasets.CIFAR10(
                 '../data',
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    elif args.data == 'TinyImageNet':
+        train_dataset = datasets.ImageFolder(
+                '../data/tiny-imagenet-200/train',
                 transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     elif args.data == 'SVHN':
         train_dataset = datasets.SVHN(
