@@ -246,6 +246,8 @@ def main_worker(gpu, ngpus_per_node, args):
         data_mean, data_std = [0.4377, 0.4438, 0.4728], [0.198, 0.201, 0.197]
     elif args.data == 'Caltech256':
         data_mean, data_std = [0.5543, 0.5357, 0.5069], [0.2424, 0.2417, 0.2442]
+    elif args.data == 'Caltech101':
+        data_mean, data_std = [0.5519, 0.5335, 0.5065], [0.2499, 0.2469, 0.248 ]
     else:
         data_mean, data_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
     normalize = transforms.Normalize(mean=data_mean, std=data_std)
@@ -297,6 +299,14 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.data == 'Caltech256':
         trn_tst = datasets.ImageFolder(
                 '../data/caltech256/256_ObjectCategories',
+                simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+        num_instances = len(trn_tst)
+        num_trn = int(round(num_instances * 0.7))
+        num_tst = num_instances - num_trn
+        train_dataset, _ = torch.utils.data.random_split(trn_tst, [num_trn, num_tst])
+    elif args.data == 'Caltech101':
+        trn_tst = datasets.ImageFolder(
+                '../data/caltech101/101_ObjectCategories',
                 simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
         num_instances = len(trn_tst)
         num_trn = int(round(num_instances * 0.7))
