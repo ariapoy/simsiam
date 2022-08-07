@@ -234,9 +234,11 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.data == 'FashionMNIST':
         data_mean, data_std = 0.2860, 0.3530
     elif args.data == 'MNIST':
-        data_mean, data_std = round(0.1307000070810318, 4), round(0.30809998512268066, 4)
+        data_mean, data_std = 0.1307, 0.3081
     elif args.data == 'CIFAR10':
         data_mean, data_std = [0.4914, 0.4822, 0.4465], [0.247,  0.2435, 0.2616]
+    elif args.data == 'CIFAR100':
+        data_mean, data_std = [0.5071, 0.4865, 0.4409], [0.2673, 0.2564, 0.2762]
     elif args.data == 'TinyImageNet':
         data_mean, data_std = [0.486,  0.4536, 0.4024], [0.2318, 0.2285, 0.2277]
     elif args.data == 'SVHN':
@@ -336,12 +338,13 @@ def main_worker(gpu, ngpus_per_node, args):
             best_loss = curr_loss
             if not args.multiprocessing_distributed or (args.multiprocessing_distributed
                     and args.rank % ngpus_per_node == 0):
-                save_checkpoint({
-                    'epoch': epoch + 1,
-                    'arch': args.arch,
-                    'state_dict': model.state_dict(),
-                    'optimizer' : optimizer.state_dict(),
-                    }, is_best=False, filename='{}_checkpoint_{:04d}_{:.4f}.pth.tar'.format(args.data, epoch, curr_loss))
+                if (epoch % 100 == 0) or (epoch > 700):
+                    save_checkpoint({
+                        'epoch': epoch + 1,
+                        'arch': args.arch,
+                        'state_dict': model.state_dict(),
+                        'optimizer' : optimizer.state_dict(),
+                        }, is_best=False, filename='{}_checkpoint_{:04d}_{:.4f}.pth.tar'.format(args.data, epoch, curr_loss))
 
     # last epoch=800
     save_checkpoint({
