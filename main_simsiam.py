@@ -284,6 +284,14 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.data == 'CIFAR10':
         train_dataset = datasets.CIFAR10(
                 '../data',
+                train=True,
+                download=True,
+                transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
+    elif args.data == 'CIFAR100':
+        train_dataset = datasets.CIFAR100(
+                '../data',
+                train=True,
+                download=True,
                 transform=simsiam.loader.TwoCropsTransform(transforms.Compose(augmentation)))
     elif args.data == 'TinyImageNet':
         train_dataset = datasets.ImageFolder(
