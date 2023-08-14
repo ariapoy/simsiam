@@ -156,6 +156,7 @@ def main_worker(gpu, ngpus_per_node, args):
     else:
         num_channel = 3
     base_model.conv1 = nn.Conv2d(num_channel, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    base_model.max_pool = nn.Identity() # nn.AdaptiveMaxPool2d(1)
     x = torch.randn(5, 1, 32, 32)
     print("=> creating model '{}'".format(base_model))
     model = simsiam.builder.SimSiam(
